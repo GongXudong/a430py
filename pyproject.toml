@@ -15,6 +15,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pandas>=2.3.2",
     "pre-commit>=4.3.0",
 ]
 

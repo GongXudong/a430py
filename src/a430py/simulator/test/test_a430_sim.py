@@ -1,6 +1,11 @@
 import unittest
+from pathlib import Path
+
+import pandas as pd
 
 from a430py.simulator.a430_sim import A430Simulator
+
+PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent.parent.parent
 
 
 class A430SimulatorTest(unittest.TestCase):
@@ -103,9 +108,186 @@ class A430SimulatorTest(unittest.TestCase):
                 fThrottle=0.689030,
                 fRudder=0,
             )
-            print(f"next_state = {next_state}")
+            # print(f"next_state = {next_state}")
+
+    def test_single_step_1(self):
+        print("In test single step 1: ")
+        # 测试 state, action -> next_state
+
+        self.sim = A430Simulator(config={})
+
+        self.sim.reset(
+            dLon=120,
+            dLat=30,
+            fAlt=10,
+            fTAS=8,
+            fYaw=90,
+        )
+
+        obs_df = pd.read_csv(PROJECT_ROOT_DIR / "src/a430py/simulator/tmp/trace.csv")
+
+        EPS = 1e-6
+
+        for index, row in obs_df.iterrows():
+            if index + 1 < obs_df.shape[0]:
+                print(f"step = {index}")
+
+                self.sim.reset()
+
+                self.sim.set_aircraft_state(
+                    vt=row["fTAS"],
+                    alpha=row["fAlpha"],
+                    beta=row["fBeta"],
+                    phi=row["fRoll"],
+                    theta=row["fPitch"],
+                    psi=row["fYaw"],
+                    p=row["fP"],
+                    q=row["fQ"],
+                    r=row["fR"],
+                    h=row["fAlt"],
+                )
+
+                print(f"\nobs: {self.sim.get_aircraft_output()}")
+
+                for i in range(2):
+                    next_obs = self.sim.step(
+                        fStickLat=0.0,
+                        fStickLon=-1.998228,
+                        fThrottle=0.689030,
+                        fRudder=0,
+                    )
+
+                    print(f"\nnext_obs: {next_obs}")
+
+                self.assertAlmostEqual(
+                    next_obs["fTAS"], obs_df.iloc[index + 1]["fTAS"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fAlpha"], obs_df.iloc[index + 1]["fAlpha"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fBeta"], obs_df.iloc[index + 1]["fBeta"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fRoll"], obs_df.iloc[index + 1]["fRoll"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fPitch"], obs_df.iloc[index + 1]["fPitch"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fYaw"], obs_df.iloc[index + 1]["fYaw"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fP"], obs_df.iloc[index + 1]["fP"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fQ"], obs_df.iloc[index + 1]["fQ"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fR"], obs_df.iloc[index + 1]["fR"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fAlt"], obs_df.iloc[index + 1]["fAlt"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    obs_df.iloc[index]["fnpos"] + next_obs["fnpos"],
+                    obs_df.iloc[index + 1]["fnpos"],
+                    delta=EPS,
+                )
+                self.assertAlmostEqual(
+                    obs_df.iloc[index]["fepos"] + next_obs["fepos"],
+                    obs_df.iloc[index + 1]["fepos"],
+                    delta=EPS,
+                )
+
+    def test_single_step_2(self):
+        print("In test single step 2: ")
+        # 测试 state, action -> next_state
+
+        self.sim = A430Simulator(config={})
+
+        self.sim.reset(
+            dLon=120,
+            dLat=30,
+            fAlt=10,
+            fTAS=8,
+            fYaw=90,
+        )
+
+        obs_df = pd.read_csv(PROJECT_ROOT_DIR / "src/a430py/simulator/tmp/trace.csv")
+
+        EPS = 1e-6
+
+        for index, row in obs_df.iterrows():
+            if index + 1 < obs_df.shape[0]:
+                print(f"step = {index}")
+
+                next_obs = self.sim.step_from_customized_observation(
+                    obs_vt=row["fTAS"],
+                    obs_alpha=row["fAlpha"],
+                    obs_beta=row["fBeta"],
+                    obs_phi=row["fRoll"],
+                    obs_theta=row["fPitch"],
+                    obs_psi=row["fYaw"],
+                    obs_p=row["fP"],
+                    obs_q=row["fQ"],
+                    obs_r=row["fR"],
+                    obs_h=row["fAlt"],
+                    act_fStickLat=0.0,
+                    act_fStickLon=-1.998228,
+                    act_fThrottle=0.689030,
+                    act_fRudder=0,
+                    update_times=2,  # TODO: 应该设置为1！！！
+                )
+
+                print(f"next_obs = {next_obs}")
+
+                self.assertAlmostEqual(
+                    next_obs["fTAS"], obs_df.iloc[index + 1]["fTAS"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fAlpha"], obs_df.iloc[index + 1]["fAlpha"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fBeta"], obs_df.iloc[index + 1]["fBeta"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fRoll"], obs_df.iloc[index + 1]["fRoll"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fPitch"], obs_df.iloc[index + 1]["fPitch"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fYaw"], obs_df.iloc[index + 1]["fYaw"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fP"], obs_df.iloc[index + 1]["fP"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fQ"], obs_df.iloc[index + 1]["fQ"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fR"], obs_df.iloc[index + 1]["fR"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    next_obs["fAlt"], obs_df.iloc[index + 1]["fAlt"], delta=EPS
+                )
+                self.assertAlmostEqual(
+                    obs_df.iloc[index]["fnpos"] + next_obs["fnpos"],
+                    obs_df.iloc[index + 1]["fnpos"],
+                    delta=EPS,
+                )
+                self.assertAlmostEqual(
+                    obs_df.iloc[index]["fepos"] + next_obs["fepos"],
+                    obs_df.iloc[index + 1]["fepos"],
+                    delta=EPS,
+                )
 
     # def test_trajectory_1(self):
+
+    #     from a430py.simulator.utils.acmiLogger import AcmiLogger
+    #     from ctypes import byref
+
     #     self.sim = A430Simulator(config={})
 
     #     self.sim.init_plane_model(
@@ -150,7 +332,7 @@ class A430SimulatorTest(unittest.TestCase):
     #                 log.write(str(value))
     #             log.write("\n")
 
-    #     self.sim.close()
+    #     del self.sim
 
     # def test_single_step_1(self,):
     #     custom_config = {

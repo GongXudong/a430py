@@ -14,3 +14,4 @@ wheels/
 
 a430_cpp/
 # !build/liba430plane.so
+src/a430py/simulator/tmp/

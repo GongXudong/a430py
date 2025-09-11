@@ -8,7 +8,7 @@ class InitializeInfo(Structure):
         ("dLat", c_double),
         ("fAlt", c_float),
         ("fTAS", c_float),
-        ("fYaw", c_float),
+        ("fYaw", c_float),  # 单位：deg
     ]
 
 
@@ -16,15 +16,15 @@ class InitializeInfo(Structure):
 class StateInfo(Structure):
     _fields_ = [
         ("vt", c_double),
-        ("alpha", c_double),
-        ("beta", c_float),
-        ("phi", c_float),
-        ("theta", c_float),
-        ("psi", c_float),
-        ("p", c_float),
-        ("q", c_float),
-        ("r", c_float),
-        ("h", c_float),
+        ("alpha", c_double),  # 单位：rad
+        ("beta", c_double),  # 单位：rad
+        ("phi", c_double),  # 单位：rad
+        ("theta", c_double),  # 单位：rad
+        ("psi", c_double),  # 单位：rad
+        ("p", c_double),  # 单位：rad/s
+        ("q", c_double),  # 单位：rad/s
+        ("r", c_double),  # 单位：rad/s
+        ("h", c_double),
     ]
 
 
@@ -34,14 +34,14 @@ class AircraftOutput(Structure):
         ("dLon", c_double),
         ("dLat", c_double),
         ("fAlt", c_float),
-        ("fRoll", c_float),
-        ("fPitch", c_float),
-        ("fYaw", c_float),
-        ("fAlpha", c_float),
-        ("fBeta", c_float),
-        ("fP", c_float),
-        ("fQ", c_float),
-        ("fR", c_float),
+        ("fRoll", c_float),  # 单位：deg
+        ("fPitch", c_float),  # 单位：deg
+        ("fYaw", c_float),  # 单位：deg
+        ("fAlpha", c_float),  # 单位：deg
+        ("fBeta", c_float),  # 单位：deg
+        ("fP", c_float),  # 单位：deg/s
+        ("fQ", c_float),  # 单位：deg/s
+        ("fR", c_float),  # 单位：deg/s
         ("fVn", c_float),
         ("fVe", c_float),
         ("fVu", c_float),

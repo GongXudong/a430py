@@ -3,6 +3,8 @@ import platform
 from ctypes import CDLL, POINTER, byref, c_double, c_int, c_uint64
 from pathlib import Path
 
+import numpy as np
+
 from a430py.simulator.utils.a430_types import (
     AeroCoeffs,
     AircraftInput,
@@ -20,7 +22,7 @@ class A430Simulator(object):
         self.step_time = 0.01  # 单拍时间，秒
         self.order = 1  # 龙格-库塔的阶数
         self.custom_config = config
-        self._config: dict = self.get_default_config()
+        self._config: dict = self.__class__.get_default_config()
         self.output_fields = [
             "dLon",
             "dLat",
@@ -129,14 +131,14 @@ class A430Simulator(object):
 
     def __del__(self) -> None:
         # 飞机销毁
-        print("释放simulator资源...")
+        # print("释放simulator资源...")
 
-        if self.a430_model is not None and self.planePtr is not None:
-            print("释放c++指针：planePtr")
+        if hasattr(self, "a430_model") and hasattr(self, "planePtr"):
+            # print("释放c++指针：planePtr")
             self.a430_model.terminate_plane(self.planePtr)
 
-        if self.a430_model is not None:
-            print("释放dll：a430_model")
+        if hasattr(self, "a430_model"):
+            # print("释放dll：a430_model")
             del self.a430_model
 
         gc.collect()
@@ -176,6 +178,8 @@ class A430Simulator(object):
         self.aircraft_input.fThrottle = fThrottle
         self.aircraft_input.fRudder = fRudder
 
+        self.a430_model.set_input(self.planePtr, self.aircraft_input)
+
     def set_aircraft_state(
         self,
         vt: float = 0.0,
@@ -190,23 +194,28 @@ class A430Simulator(object):
         h: float = 0.0,
     ) -> None:
         self.aircraft_state.vt = vt
-        self.aircraft_state.alpha = alpha
-        self.aircraft_state.beta = beta
-        self.aircraft_state.phi = phi
-        self.aircraft_state.theta = theta
-        self.aircraft_state.psi = psi
-        self.aircraft_state.p = p
-        self.aircraft_state.q = q
-        self.aircraft_state.r = r
+        self.aircraft_state.alpha = np.deg2rad(alpha)
+        self.aircraft_state.beta = np.deg2rad(beta)
+        self.aircraft_state.phi = np.deg2rad(phi)
+        self.aircraft_state.theta = np.deg2rad(theta)
+        self.aircraft_state.psi = np.deg2rad(psi)
+        self.aircraft_state.p = np.deg2rad(p)
+        self.aircraft_state.q = np.deg2rad(q)
+        self.aircraft_state.r = np.deg2rad(r)
         self.aircraft_state.h = h
+
+        print(
+            f"In set_state (python): vt = {vt}, alpha: {alpha}, beta = {beta}, phi = {phi}, theta = {theta}, psi = {psi}, p = {p}, q = {q}, r = {r}, h = {h}"
+        )
+
+        self.a430_model.set_state(self.planePtr, self.aircraft_state)
 
     def get_aircraft_output(self) -> dict:
         self.a430_model.get_output(self.planePtr, byref(self.aircraft_output))
         return {ky: getattr(self.aircraft_output, ky) for ky in self.output_fields}
 
-    def get_default_config(
-        self,
-    ):
+    @staticmethod
+    def get_default_config() -> dict:
         return {
             # plane_const, 8个
             "S": 0.040809,
@@ -254,9 +263,9 @@ class A430Simulator(object):
         self.custom_config = config
         self._config.update(config)
 
-        assert set(self.get_default_config().keys()) <= set(
+        assert set(self.__class__.get_default_config().keys()) <= set(
             self._config.keys()
-        ), f"config must contain keys: {self.get_default_config().keys()}!"
+        ), f"config must contain keys: {self.__class__.get_default_config().keys()}!"
 
         self.plane_consts.S = self._config["S"]
         self.plane_consts.cbar = self._config["cbar"]
@@ -308,7 +317,7 @@ class A430Simulator(object):
         fTAS: float = 80.0,
         fYaw: float = 90.0,
     ) -> dict:
-        if self.a430_model is not None and self.planePtr is not None:
+        if hasattr(self, "a430_model") and hasattr(self, "planePtr"):
             self.a430_model.terminate_plane(self.planePtr)
 
         self.init_plane_model(dLon=dLon, dLat=dLat, fAlt=fAlt, fTAS=fTAS, fYaw=fYaw)
@@ -328,8 +337,48 @@ class A430Simulator(object):
             fThrottle=fThrottle,
             fRudder=fRudder,
         )
-        self.a430_model.set_input(self.planePtr, self.aircraft_input)
         # 更新飞机状态
         self.a430_model.update(self.planePtr)
         # 读取飞机输出状态
         return self.get_aircraft_output()
+
+    def step_from_customized_observation(
+        self,
+        obs_vt: float = 0.0,
+        obs_alpha: float = 0.0,
+        obs_beta: float = 0.0,
+        obs_phi: float = 0.0,
+        obs_theta: float = 0.0,
+        obs_psi: float = 0.0,
+        obs_p: float = 0.0,
+        obs_q: float = 0.0,
+        obs_r: float = 0.0,
+        obs_h: float = 0.0,
+        act_fStickLat: float = 0.0,
+        act_fStickLon: float = 0.0,
+        act_fThrottle: float = 0.0,
+        act_fRudder: float = 0.0,
+        update_times: int = 1,
+    ):
+        self.reset()
+        self.set_aircraft_state(
+            vt=obs_vt,
+            alpha=obs_alpha,
+            beta=obs_beta,
+            phi=obs_phi,
+            theta=obs_theta,
+            psi=obs_psi,
+            p=obs_p,
+            q=obs_q,
+            r=obs_r,
+            h=obs_h,
+        )
+        for _ in range(update_times):
+            next_obs = self.step(
+                fStickLat=act_fStickLat,
+                fStickLon=act_fStickLon,
+                fThrottle=act_fThrottle,
+                fRudder=act_fRudder,
+            )
+
+        return next_obs
