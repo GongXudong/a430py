@@ -2,6 +2,9 @@
 name = "a430py"
 version = "0.1.0"
 description = "Add your description here"
+authors = [
+    { name = "Xudong Gong", email = "gongxudong_cs@aliyun.com" },
+]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -17,8 +20,16 @@ build-backend = "uv_build"
 dev = [
     "pandas>=2.3.2",
     "pre-commit>=4.3.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
 ]
 
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]  # 测试文件所在目录
+pythonpath = ["src"]   # 允许测试代码导入src目录下的模块
+addopts = "-v"         # 默认显示详细输出
+python_files = ["test_*.py", "*_test.py"]  # 测试文件命名规则

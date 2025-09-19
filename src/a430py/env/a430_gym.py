@@ -37,10 +37,10 @@ class A430Gym(gym.Env):
         ]
 
         self.action_keys = [
-            "fStickLat",
-            "fStickLon",
+            "fStickLat",  # 副翼指令
+            "fStickLon",  # 升降舵指令
             "fRudder",
-            "fThrottle",
+            "fThrottle",  # 油门指令
         ]
 
         self.step_cnt = 0
@@ -130,3 +130,6 @@ class A430Gym(gym.Env):
 
     def get_observation(self, obs_dict: dict) -> np.ndarray:
         return np.array([obs_dict[ky] for ky in self.observation_keys])
+
+    def get_action(self, act_dict: dict) -> np.ndarray:
+        return np.array([act_dict[ky] for ky in self.action_keys])

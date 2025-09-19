@@ -3,7 +3,7 @@ import unittest
 from a430py.env.a430_gym import A430Gym
 
 
-class A430GymTest(unittest.TestCase):
+class TestA430Gym(unittest.TestCase):
     def test_reset_1(self):
         print("In test reset 1: ")
 

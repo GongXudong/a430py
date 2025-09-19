@@ -12,6 +12,9 @@ wheels/
 # IDE
 .vscode/
 
+.coverage
+
 a430_cpp/
+a430_cpp_back/
 # !build/liba430plane.so
 src/a430py/simulator/tmp/
