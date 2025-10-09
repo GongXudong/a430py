@@ -35,9 +35,12 @@ def test_init_simulator_from_customized_config():
     print("In test trajectory 3 with plane initialized with customized configs: ")
     custom_config = {
         "m": 0.543,
+        "Jx": 1.5,
+        "CLal": 3.0,
+        "Cnbe": 2.0,
+        "Cybe": 2.0,
     }
     sim = A430Simulator(config=custom_config)
-    print(f"check config: m = {sim.get_config()['m']}")
 
     sim.init_plane_model(
         dLon=120,
@@ -46,6 +49,18 @@ def test_init_simulator_from_customized_config():
         fTAS=8,
         fYaw=90,
     )
+
+    config_read_from_sim = {
+        **sim.get_plane_const(),
+        **sim.get_aero_coeffs(),
+    }
+    print(config_read_from_sim)
+
+    for ky in custom_config.keys():
+        print(
+            f"check config {ky}, {custom_config[ky]}, {sim.get_config()[ky]}, {config_read_from_sim[ky]}"
+        )
+        assert custom_config[ky] == sim.get_config()[ky] == config_read_from_sim[ky]
 
     for i in range(60):
         next_state = sim.step(

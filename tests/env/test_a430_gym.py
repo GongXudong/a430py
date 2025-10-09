@@ -1,57 +1,59 @@
-import unittest
+import numpy as np
 
 from a430py.env.a430_gym import A430Gym
 
 
-class TestA430Gym(unittest.TestCase):
-    def test_reset_1(self):
-        print("In test reset 1: ")
+def test_reset_1():
+    print("In test reset 1: ")
 
-        self.env = A430Gym()
-        obs, info = self.env.reset()
+    env = A430Gym()
+    obs, info = env.reset()
 
-        print(obs)
+    print(obs)
 
-        self.assertAlmostEqual(obs[6], 0.0)  # fnpos
-        self.assertAlmostEqual(obs[7], 0.0)  # fepos
+    assert np.allclose(obs[6], 0.0)  # fnpos
+    assert np.allclose(obs[7], 0.0)  # fepos
 
-    def test_step_1(self):
-        print("In test step 1: ")
 
-        self.env = A430Gym(custom_aircraft_config={"m": 0.5})
-        obs, info = self.env.reset()
+def test_step_1():
+    print("In test step 1: ")
 
-        # 用于配平的动作
-        action = [0.0, -1.998228, 0.0, 0.689030]
+    env = A430Gym(custom_aircraft_config={"m": 0.5})
+    obs, info = env.reset()
 
-        for i in range(60):
-            next_obs, reward, terminated, truncated, info = self.env.step(action)
-            print(f"step {i}: {next_obs}")
+    # 用于配平的动作
+    action = [0.0, -1.998228, 0.0, 0.689030]
 
-    def test_step_2(self):
-        print("In test step 2: ")
+    for i in range(60):
+        next_obs, reward, terminated, truncated, info = env.step(action)
+        # print(f"step {i}: {next_obs}")
 
-        self.env = A430Gym()
-        obs, info = self.env.reset()
 
-        # 用于配平的动作
-        action = [0.0, -1.998228, 0.0, 0.689030]
+def test_step_2():
+    print("In test step 2: ")
 
-        for i in range(60):
-            next_obs, reward, terminated, truncated, info = self.env.step(action)
+    env = A430Gym()
+    obs, info = env.reset()
 
-        obs, info = self.env.reset()
-        for i in range(60):
-            next_obs, reward, terminated, truncated, info = self.env.step(action)
-            print(f"step {i}: {next_obs}")
+    # 用于配平的动作
+    action = [0.0, -1.998228, 0.0, 0.689030]
 
-    def test_check_config(self):
-        print(f"In test check_config: ")
+    for i in range(60):
+        next_obs, reward, terminated, truncated, info = env.step(action)
 
-        self.env = A430Gym(custom_aircraft_config={"m": 0.555})
+    obs, info = env.reset()
+    for i in range(60):
+        next_obs, reward, terminated, truncated, info = env.step(action)
+        # print(f"step {i}: {next_obs}")
 
-        self.env.check_config()
+
+def test_check_config():
+    print(f"In test check_config: ")
+
+    env = A430Gym(custom_aircraft_config={"m": 0.555, "B": 0.6})
+
+    env.check_config()
 
 
 if __name__ == "__main__":
-    unittest.main()
+    test_check_config()

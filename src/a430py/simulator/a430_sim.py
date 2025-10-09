@@ -47,6 +47,41 @@ class A430Simulator(object):
             "fnpos",
             "fepos",
         ]
+        self.plane_const_fields = [
+            "S",
+            "cbar",
+            "B",
+            "m",
+            "Jx",
+            "Jy",
+            "Jz",
+            "Jxz",
+        ]
+        self.aero_coeff_fields = [
+            "CL0",
+            "CLal",
+            "CLq",
+            "CLde",
+            "Cy0",
+            "Cybe",
+            "Cyp",
+            "Cyr",
+            "Cyda",
+            "Cl0",
+            "Clbe",
+            "Clp",
+            "Clr",
+            "Clda",
+            "Cm0",
+            "Cmal",
+            "Cmq",
+            "Cmde",
+            "Cn0",
+            "Cnbe",
+            "Cnp",
+            "Cnr",
+            "Cnda",
+        ]
 
         self.initDll()
         self.initArgs()
@@ -81,6 +116,9 @@ class A430Simulator(object):
         self.plane_consts: PlaneConsts = PlaneConsts()
         self.aero_coeffs: AeroCoeffs = AeroCoeffs()
 
+        self.plane_consts_for_read: PlaneConsts = PlaneConsts()
+        self.aero_coeffs_for_read: AeroCoeffs = AeroCoeffs()
+
     def initDllFuncTypes(self) -> None:
         """设定dll函数输入输出"""
         self.a430_model.initialize.argtypes = [c_double, c_int, InitializeInfo]
@@ -97,6 +135,8 @@ class A430Simulator(object):
 
         self.a430_model.set_input.argtypes = [c_uint64, AircraftInput]
         self.a430_model.update.argtypes = [c_uint64]
+        self.a430_model.get_plane_consts.argtypes = [c_uint64, POINTER(PlaneConsts)]
+        self.a430_model.get_aero_coeffs.argtypes = [c_uint64, POINTER(AeroCoeffs)]
         self.a430_model.check_config.argtypes = [c_uint64]
         self.a430_model.get_output.argtypes = [c_uint64, POINTER(AircraftOutput)]
         self.a430_model.get_delta.argtypes = [c_uint64, POINTER(AircraftOutput)]
@@ -215,6 +255,21 @@ class A430Simulator(object):
         self.a430_model.get_output(self.planePtr, byref(self.aircraft_output))
         return {ky: getattr(self.aircraft_output, ky) for ky in self.output_fields}
 
+    def get_plane_const(self) -> dict:
+        self.a430_model.get_plane_consts(
+            self.planePtr, byref(self.plane_consts_for_read)
+        )
+        return {
+            ky: getattr(self.plane_consts_for_read, ky)
+            for ky in self.plane_const_fields
+        }
+
+    def get_aero_coeffs(self) -> dict:
+        self.a430_model.get_aero_coeffs(self.planePtr, byref(self.aero_coeffs_for_read))
+        return {
+            ky: getattr(self.aero_coeffs_for_read, ky) for ky in self.aero_coeff_fields
+        }
+
     @staticmethod
     def get_default_config() -> dict:
         return {
@@ -233,24 +288,24 @@ class A430Simulator(object):
             "CLal": 4.235972,
             "CLde": 0.011006,
             "CD0": 0.04735,
-            "CDk": 1,
+            "CDk": 1.0,
             "CDde": -0.0013,
             "CDda": 0.000149,
-            "Cy0": 0,
+            "Cy0": 0.0,
             "Cybe": -0.356799,
             "Cyp": -0.230683,
             "Cyr": 0.378474,
             "Cyda": -0.004417,
-            "Cl0": 0,
+            "Cl0": 0.0,
             "Clbe": -0.01363,
             "Clp": -0.340622,
             "Clr": 0.015922,
             "Clda": -0.006115,
-            "Cm0": 0,
+            "Cm0": 0.0,
             "Cmal": -0.459587,
             "Cmq": -6.644907,
             "Cmde": -0.021453,
-            "Cn0": 0,
+            "Cn0": 0.0,
             "Cnbe": 0.158268,
             "Cnp": 0.110384,
             "Cnr": -0.185416,
