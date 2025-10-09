@@ -133,3 +133,7 @@ class A430Gym(gym.Env):
 
     def get_action(self, act_dict: dict) -> np.ndarray:
         return np.array([act_dict[ky] for ky in self.action_keys])
+
+    def check_config(self):
+        print(f"In python, check config, m = {self.simulator._config['m']}")
+        self.simulator.a430_model.check_config(self.simulator.planePtr)

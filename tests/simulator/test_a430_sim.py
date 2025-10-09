@@ -34,7 +34,7 @@ def test_init_simulator_from_default_config():
 def test_init_simulator_from_customized_config():
     print("In test trajectory 3 with plane initialized with customized configs: ")
     custom_config = {
-        "m": 0.1,
+        "m": 0.543,
     }
     sim = A430Simulator(config=custom_config)
     print(f"check config: m = {sim.get_config()['m']}")
@@ -59,7 +59,7 @@ def test_init_simulator_from_customized_config():
 def test_reset_simulator():
     print("In test reset 1: ")
     custom_config = {
-        "m": 0.1,
+        "m": 0.123,
     }
     sim = A430Simulator(config=custom_config)
     print(f"check config: m = {sim.get_config()['m']}")
@@ -184,3 +184,8 @@ def test_simulator_single_step(csv_path: Path, eps: float):
                 obs_df.iloc[index + 1]["fepos"],
                 atol=eps,
             )
+
+
+if __name__ == "__main__":
+    test_init_simulator_from_customized_config()
+    test_reset_simulator()

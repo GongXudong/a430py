@@ -18,7 +18,7 @@ class TestA430Gym(unittest.TestCase):
     def test_step_1(self):
         print("In test step 1: ")
 
-        self.env = A430Gym()
+        self.env = A430Gym(custom_aircraft_config={"m": 0.5})
         obs, info = self.env.reset()
 
         # 用于配平的动作
@@ -44,6 +44,13 @@ class TestA430Gym(unittest.TestCase):
         for i in range(60):
             next_obs, reward, terminated, truncated, info = self.env.step(action)
             print(f"step {i}: {next_obs}")
+
+    def test_check_config(self):
+        print(f"In test check_config: ")
+
+        self.env = A430Gym(custom_aircraft_config={"m": 0.555})
+
+        self.env.check_config()
 
 
 if __name__ == "__main__":

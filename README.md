@@ -1,6 +1,6 @@
 # A430Py
 
-A simulator and Gymnasium environment for A430 aircraft.
+A simulator and Gymnasium environment for **A430** aircraft.
 
 ## Install
 

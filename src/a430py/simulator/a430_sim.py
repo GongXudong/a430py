@@ -97,6 +97,7 @@ class A430Simulator(object):
 
         self.a430_model.set_input.argtypes = [c_uint64, AircraftInput]
         self.a430_model.update.argtypes = [c_uint64]
+        self.a430_model.check_config.argtypes = [c_uint64]
         self.a430_model.get_output.argtypes = [c_uint64, POINTER(AircraftOutput)]
         self.a430_model.get_delta.argtypes = [c_uint64, POINTER(AircraftOutput)]
         self.a430_model.terminate_plane.argtypes = [c_uint64]
@@ -204,9 +205,9 @@ class A430Simulator(object):
         self.aircraft_state.r = np.deg2rad(r)
         self.aircraft_state.h = h
 
-        print(
-            f"In set_state (python): vt = {vt}, alpha: {alpha}, beta = {beta}, phi = {phi}, theta = {theta}, psi = {psi}, p = {p}, q = {q}, r = {r}, h = {h}"
-        )
+        # print(
+        #     f"In set_state (python): vt = {vt}, alpha: {alpha}, beta = {beta}, phi = {phi}, theta = {theta}, psi = {psi}, p = {p}, q = {q}, r = {r}, h = {h}"
+        # )
 
         self.a430_model.set_state(self.planePtr, self.aircraft_state)
 
