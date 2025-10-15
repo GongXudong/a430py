@@ -7,6 +7,12 @@ A simulator and Gymnasium environment for **A430** aircraft.
 ### From source
 
 ```bash
+git clone https://github.com/GongXudong/a430py
+```
+
+or
+
+```bash
 git clone https://www.gitlink.org.cn/gongxudong/a430py
 ```
 
@@ -44,4 +50,24 @@ git commit -m <MESSAGE> --no-verify
 
 # update pre-commit hook
 pre-commit autoupdate
+```
+
+### Build
+
+```bash
+uv build
+```
+
+### Publish
+
+```bash
+# publish to PyPI
+uv publish
+
+# publish to test.pypi
+uv publish --index testpypi
+
+# test publish
+uv run --with a430py==0.1.3 -i https://test.pypi.org/simple/ --no-project -- python -c "import a430py;import gymnasium as gym;env=gym.make('A430Gym
+-v0');print(env.reset())"
 ```

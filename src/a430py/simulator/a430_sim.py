@@ -14,7 +14,7 @@ from a430py.simulator.utils.a430_types import (
     StateInfo,
 )
 
-PROJECT_ROOT_DIR = Path(__file__).parent
+PROJECT_ROOT_DIR = Path(__file__).parent.parent
 
 
 class A430Simulator(object):
@@ -95,11 +95,9 @@ class A430Simulator(object):
         """加载dll"""
         osType = platform.system()
         if osType == "Linux":
-            dll_path = str(
-                PROJECT_ROOT_DIR.parent.parent.parent / "build/liba430plane.so"
-            )
+            dll_path = str(PROJECT_ROOT_DIR / "simulator" / "libs" / "liba430plane.so")
         elif osType == "Windows":
-            dll_path = str(PROJECT_ROOT_DIR / "libs/a430plane.dll")
+            dll_path = str(PROJECT_ROOT_DIR / "simulator" / "libs" / "a430plane.dll")
         else:
             raise Exception("Unsupported OS, only Linux and Windows are supported!!!")
 
