@@ -18,7 +18,13 @@ git clone https://www.gitlink.org.cn/gongxudong/a430py
 
 ### From PyPI
 
-TODO
+```bash
+# use pip
+pip install a430py
+
+# use uv
+uv add a430py
+```
 
 ## Develop
 
